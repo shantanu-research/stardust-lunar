@@ -64,15 +64,18 @@ export function startAura(host, selector) {
       if (!seen) { st.x = tx; st.y = ty; st.hw = r.width / 2; st.hh = r.height / 2; seen = true; }
       st.x += (tx - st.x) * .1; st.y += (ty - st.y) * .1; st.hw += (r.width / 2 - st.hw) * .15; st.hh += (r.height / 2 - st.hh) * .15;
     }
-    if (st.glow < .004 && !target) { sh.gl.clear(sh.gl.COLOR_BUFFER_BIT); seen = false; return; }
+    if (st.glow < .004 && !target) { sh.gl.disable(sh.gl.SCISSOR_TEST); sh.gl.clear(sh.gl.COLOR_BUFFER_BIT); seen = false; return; }
     sh.set('uRes', canvas.width, canvas.height); sh.set('uDpr', dpr); sh.set('uTime', (now - t0) / 1000); sh.set('uCard', st.x, st.y, st.hw, st.hh);
     m.x += (m.tx - m.x) * .06; m.ty += 0; m.y += (m.ty - m.y) * .06; sh.set('uMouse', m.x, m.y); sh.set('uGlow', st.glow); sh.set('uBloom', st.bloom); sh.set('uLight', light() ? 1 : 0);
     const c = getComputedStyle(document.documentElement).getPropertyValue('--flare-rgb').trim().split(',').map(Number); sh.set('uTint', ...(c.length === 3 ? c.map(v => v / 255) : [.54, .63, 1]));
-    sh.draw(); raf = requestAnimationFrame(frame);
+    const reach = Math.hypot(st.hw, st.hh) * 1.9, cw = canvas.width, ch = canvas.height;
+    const x0 = Math.max(0, Math.floor((st.x - reach) * dpr)), x1 = Math.min(cw, Math.ceil((st.x + reach) * dpr)), y0 = Math.max(0, Math.floor((st.y - reach) * dpr)), y1 = Math.min(ch, Math.ceil((st.y + reach) * dpr));
+    sh.draw([x0, ch - y1, Math.max(1, x1 - x0), Math.max(1, y1 - y0)]);
+    if (!reduce.matches) raf = requestAnimationFrame(frame);
   }
-  const kick = () => { if (!raf && alive && !reduce.matches) raf = requestAnimationFrame(frame); };
-  const enter = (c) => { if (target === c) return; if (st.glow < .02) seen = false; target = c; tween('glow', 1, 1.5, 'power2.out'); tween('bloom', 1, 2.4, 'power3.out'); kick(); };
-  const leave = () => { target = null; tween('glow', 0, 1.1, 'power2.inOut'); tween('bloom', .4, 1.4, 'power2.out'); kick(); };
+  const kick = () => { if (!raf && alive) raf = requestAnimationFrame(frame); };
+  const enter = (c) => { if (target === c) return; if (st.glow < .02) seen = false; target = c; tween('glow', 1, reduce.matches ? .01 : .9, 'expo.out'); tween('bloom', 1, reduce.matches ? .01 : 1.4, 'expo.out'); kick(); if (reduce.matches) setTimeout(kick, 60); };
+  const leave = () => { target = null; tween('glow', 0, reduce.matches ? .01 : .65, 'power3.in'); tween('bloom', .4, reduce.matches ? .01 : .9, 'power2.in'); kick(); if (reduce.matches) setTimeout(kick, 60); };
   const over = (e) => { const c = e.target.closest?.(selector); if (c && host.contains(c)) enter(c); };
   const out = (e) => { const c = e.target.closest?.(selector); if (c && !c.contains(e.relatedTarget) && target === c) leave(); };
   host.addEventListener('pointermove', (e) => { if (!target) return; const r = target.getBoundingClientRect(), R = Math.hypot(r.width, r.height) / 2; m.tx = (e.clientX - (r.left + r.width / 2)) / R; m.ty = (e.clientY - (r.top + r.height / 2)) / R; }, { passive: true });

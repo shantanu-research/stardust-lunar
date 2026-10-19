@@ -14,7 +14,7 @@ export function createShader(canvas, fragSrc, { premultiplied = true } = {}) {
   return {
     gl, size(w, h) { canvas.width = w; canvas.height = h; gl.viewport(0, 0, w, h); },
     set(n, ...v) { const l = U(n); if (l == null) return; ({ 1: () => gl.uniform1f(l, v[0]), 2: () => gl.uniform2f(l, v[0], v[1]), 3: () => gl.uniform3f(l, v[0], v[1], v[2]), 4: () => gl.uniform4f(l, v[0], v[1], v[2], v[3]) })[v.length](); },
-    draw() { gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLES, 0, 3); },
+    draw(r) { gl.disable(gl.SCISSOR_TEST); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); if (r) { gl.enable(gl.SCISSOR_TEST); gl.scissor(r[0], r[1], r[2], r[3]); } gl.drawArrays(gl.TRIANGLES, 0, 3); },
     dispose() { const e = gl.getExtension('WEBGL_lose_context'); e && e.loseContext(); }
   };
 }
