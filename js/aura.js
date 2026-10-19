@@ -6,30 +6,39 @@ const FRAG = `precision highp float;
 uniform vec2 uRes; uniform float uTime, uGlow, uBloom, uLight, uDpr; uniform vec4 uCard; uniform vec3 uTint; uniform vec2 uMouse;
 ${NOISE_GLSL}
 float sdBox(vec2 p, vec2 b, float r){ vec2 q = abs(p) - b + r; return length(max(q, 0.)) + min(max(q.x, q.y), 0.) - r; }
+// A family of silky strands fanning from a point on the card edge and bending as they travel.
+float strands(vec2 p, vec2 src, vec2 dir, float t, float seed, float N, float spread, float reach){
+  vec2 q = p - src; float r = length(q);
+  float da = atan(q.y, q.x) - atan(dir.y, dir.x); da = mod(da + 3.14159, 6.28318) - 3.14159;
+  float bend = (.5 * sin(r * 1.8 - t * .1 + seed) + .16 * sin(r * 3.4 + t * .07 + seed * 2.3)) * r + .5 * r * r * sin(seed * 3. + t * .04) + uMouse.x * .25 * r;
+  float x = (da + bend) * N, id = floor(x), fr = fract(x) - .5;
+  float h = hash(vec2(id, seed));
+  float w = mix(.07, .2, h) * (1. + r * .5);
+  float line = exp(-fr * fr / (w * w)) * smoothstep(.42, .8, h);
+  float cone = smoothstep(spread, 0., abs(da));
+  return line * cone * exp(-r * reach) * smoothstep(.02, .22, r);
+}
 void main(){
   vec2 frag = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y) / uDpr;
   vec2 rel = frag - uCard.xy;
   float R = length(uCard.zw);
   float d = sdBox(rel, uCard.zw, 20.);
-  vec2 p = rel / R;
+  vec2 p = rel / R, hw = uCard.zw / R;
   float t = uTime;
-  vec2 hw = uCard.zw / R;
-  // plasma wisps rise from the upper-right corner and curl up-left; a lesser plume trails from the lower-left
-  float dc = min(length(p - vec2(hw.x * .85, -hw.y)), length(p - vec2(-hw.x, hw.y * .7)) * 1.5);
-  float reach = exp(-dc * 2.7) * smoothstep(-.02, .06, d / R);
-  vec2 q = p + .55 * vec2(fbm(p * 1.6 + vec2(0., t * .03)), fbm(p * 1.6 + vec2(5.2, 1.3) - t * .025));
-  q += .35 * vec2(fbm(q * 2.6 + t * .02), fbm(q * 2.6 + 3.7 - t * .018));
-  q += vec2(-.18, .35) * dc;
-  q += (uMouse - p) * .22 * exp(-dc * 1.2);
-  float r1 = pow(clamp(1. - abs(2. * fbm(q * 2.4 + vec2(0., -t * .045)) - 1.), 0., 1.), 9.);
-  float r2 = pow(clamp(1. - abs(2. * fbm(q * 6.2 + vec2(t * .03, 2.1)) - 1.), 0., 1.), 8.);
-  float body = smoothstep(.35, .85, fbm(q * 1.5 + vec2(0., -t * .02)));
-  float edge = exp(-max(d, 0.) / 16.) * .22 + exp(-max(d, 0.) / 70.) * .12;
-  float I = (r1 * 1.25 + r2 * .5 + body * .12) * reach + edge * (.5 + .5 * reach);
-  I *= uGlow * mix(.12, 1., smoothstep(-26., 3., d)) * (.55 + .45 * uBloom);
-  vec3 col = mix(vec3(.93, .94, 1.), uTint, .14);
+  float k = 0.;
+  k += 1.00 * strands(p, vec2(hw.x * .85, -hw.y), vec2(.1, -1.), t, 1.3, 11., .95, 1.7);
+  k += .80 * strands(p, vec2(hw.x * .6, -hw.y), vec2(-.5, -1.), t, 4.7, 9., .9, 1.9);
+  k += .45 * strands(p, vec2(-hw.x * .3, -hw.y), vec2(-.8, -.8), t, 7.9, 9., .8, 2.3);
+  k += .55 * strands(p, vec2(-hw.x, hw.y * .7), vec2(-1., .5), t, 2.2, 9., .8, 2.2);
+  k += .35 * strands(p, vec2(hw.x * .4, hw.y), vec2(.5, 1.), t, 5.5, 9., .8, 2.4);
+  k *= smoothstep(-.02, .03, d / R);
+  float rim = exp(-max(d, 0.) / 4.) * .42 + exp(-max(d, 0.) / 20.) * .16 + exp(-max(d, 0.) / 80.) * .08;
+  float haze = smoothstep(.2, .9, fbm(p * 1.3 + vec2(0., -t * .02))) * exp(-max(d, 0.) / (R * .5)) * .12;
+  float I = (k * 1.35 + rim * (.7 + .3 * uBloom) + haze) * uGlow;
+  I *= mix(.08, 1., smoothstep(-24., 2., d));
+  vec3 col = mix(vec3(.95, .96, 1.), uTint, .1);
   if (uLight > .5) { float a = clamp(I * .5, 0., 1.); gl_FragColor = vec4(vec3(.1, .12, .26) * a, a); return; }
-  vec3 c = 1. - exp(-col * I * 1.9);
+  vec3 c = 1. - exp(-col * I * 1.6);
   gl_FragColor = vec4(c, clamp(max(c.r, max(c.g, c.b)), 0., 1.));
 }`;
 
