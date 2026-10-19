@@ -3,7 +3,7 @@
 import { createShader, NOISE_GLSL, governor } from './gl.js';
 
 const FRAG = `precision highp float;
-uniform vec2 uRes; uniform float uTime, uGlow, uBloom, uLight, uDpr; uniform vec4 uCard; uniform vec3 uTint; uniform vec2 uMouse;
+uniform vec2 uRes; uniform float uTime, uGlow, uBloom, uLight, uDpr; uniform vec4 uCard; uniform vec3 uTint; uniform vec2 uMouse; uniform float uStr;
 ${NOISE_GLSL}
 float sdBox(vec2 p, vec2 b, float r){ vec2 q = abs(p) - b + r; return length(max(q, 0.)) + min(max(q.x, q.y), 0.) - r; }
 // A family of silky strands fanning from a point on the card edge and bending as they travel.
@@ -31,7 +31,7 @@ void main(){
   k += .45 * strands(p, vec2(-hw.x * .3, -hw.y), vec2(-.8, -.8), t, 7.9, 9., .8, 2.3);
   k += .55 * strands(p, vec2(-hw.x, hw.y * .7), vec2(-1., .5), t, 2.2, 9., .8, 2.2);
   k += .35 * strands(p, vec2(hw.x * .4, hw.y), vec2(.5, 1.), t, 5.5, 9., .8, 2.4);
-  k *= smoothstep(-.02, .03, d / R);
+  k *= smoothstep(-.02, .03, d / R) * uStr;
   float rim = exp(-max(d, 0.) / 4.) * .42 + exp(-max(d, 0.) / 20.) * .16 + exp(-max(d, 0.) / 80.) * .08;
   float haze = smoothstep(.2, .9, fbm(p * 1.3 + vec2(0., -t * .02))) * exp(-max(d, 0.) / (R * .5)) * .12;
   float I = (k * 1.35 + rim * (.7 + .3 * uBloom) + haze) * uGlow;
@@ -42,7 +42,7 @@ void main(){
   gl_FragColor = vec4(c, clamp(max(c.r, max(c.g, c.b)), 0., 1.));
 }`;
 
-export function startAura(host, selector) {
+export function startAura(host, selector, { strands = 1 } = {}) {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const canvas = document.createElement('canvas'); canvas.className = 'flare'; canvas.setAttribute('aria-hidden', 'true'); document.body.append(canvas);
   const sh = createShader(canvas, FRAG);
@@ -66,7 +66,7 @@ export function startAura(host, selector) {
     }
     if (st.glow < .004 && !target) { sh.gl.disable(sh.gl.SCISSOR_TEST); sh.gl.clear(sh.gl.COLOR_BUFFER_BIT); seen = false; return; }
     sh.set('uRes', canvas.width, canvas.height); sh.set('uDpr', dpr); sh.set('uTime', (now - t0) / 1000); sh.set('uCard', st.x, st.y, st.hw, st.hh);
-    m.x += (m.tx - m.x) * .06; m.ty += 0; m.y += (m.ty - m.y) * .06; sh.set('uMouse', m.x, m.y); sh.set('uGlow', st.glow); sh.set('uBloom', st.bloom); sh.set('uLight', light() ? 1 : 0);
+    m.x += (m.tx - m.x) * .06; m.ty += 0; m.y += (m.ty - m.y) * .06; sh.set('uMouse', m.x, m.y); sh.set('uStr', strands); sh.set('uGlow', st.glow); sh.set('uBloom', st.bloom); sh.set('uLight', light() ? 1 : 0);
     const c = getComputedStyle(document.documentElement).getPropertyValue('--flare-rgb').trim().split(',').map(Number); sh.set('uTint', ...(c.length === 3 ? c.map(v => v / 255) : [.54, .63, 1]));
     const reach = Math.hypot(st.hw, st.hh) * 1.9, cw = canvas.width, ch = canvas.height;
     const x0 = Math.max(0, Math.floor((st.x - reach) * dpr)), x1 = Math.min(cw, Math.ceil((st.x + reach) * dpr)), y0 = Math.max(0, Math.floor((st.y - reach) * dpr)), y1 = Math.min(ch, Math.ceil((st.y + reach) * dpr));

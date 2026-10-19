@@ -152,3 +152,9 @@ body.perf-low .moon{animation:none !important}
 @media (prefers-reduced-motion:reduce){.moon{animation:none !important}}
 :root[data-os=linux] body{text-rendering:optimizeLegibility}
 html{scrollbar-width:thin;scrollbar-color:#333 transparent}
+
+/* ═════ lunar-dust flow field (mode screen) ═════ */
+.flow{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity 1.6s cubic-bezier(.16,1,.3,1)}
+.flow.on{opacity:1}
+body.analysing .flow{opacity:0;transition-duration:.5s}
+:root[data-theme=light] .flow{filter:invert(1);mix-blend-mode:multiply}

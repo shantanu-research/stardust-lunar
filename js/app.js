@@ -7,6 +7,7 @@ import { paintMoons } from './moons.js';
 import { newProject, makeSample } from './runner.js';
 import { renderWorkspace } from './workspace.js';
 import { startAura } from './aura.js';
+import { startFlow } from './flow.js';
 import { startStars } from './stars.js';
 
 startStars();
@@ -150,7 +151,7 @@ function renderModes() {
     <p class="modes-note">The moons guide your analysis</p>`;
   paintMoons(view);
   $('#modeGrid').addEventListener('click', (e) => { const b = e.target.closest('[data-mode]'); if (b) openNewProject(b.dataset.mode); });
-  return startAura($('#modeGrid'), '.mode');
+  return startFlow($('#modeGrid'), '.mode');
 }
 
 // ───────── Projects ─────────
