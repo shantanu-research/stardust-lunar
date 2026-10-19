@@ -7,7 +7,7 @@ import { paintMoons } from './moons.js';
 import { newProject, makeSample } from './runner.js';
 import { renderWorkspace } from './workspace.js';
 import { startAura } from './aura.js';
-import { startFlow } from './flow.js';
+import { startFlow } from './field.js';
 import { startStars } from './stars.js';
 
 startStars();

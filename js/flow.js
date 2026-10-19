@@ -1,4 +1,4 @@
-/* Lunar-dust flow field for the mode screen.
+/* CPU fallback for the lunar-dust field (used when WebGL2 float render targets are unavailable; see field.js).
    Thousands of particles ride a slowly evolving curl-noise current (divergence-free, so it swirls rather than
    pools). Each frame they are drawn as short line segments into a feedback buffer that fades a little, so their
    paths accumulate into silk-like filaments. The field bends around the hovered card, is stirred by a lagging
@@ -22,7 +22,7 @@ const VS_LINE = 'attribute vec2 p;attribute float a;uniform vec2 res;varying flo
 const FS_LINE = 'precision mediump float;varying float va;void main(){gl_FragColor=vec4(va,va,va,va);}';
 const VS_QUAD = 'attribute vec2 q;varying vec2 uv;void main(){uv=q*.5+.5;gl_Position=vec4(q,0.,1.);}';
 const FS_FADE = 'precision mediump float;uniform sampler2D t;uniform float k;varying vec2 uv;void main(){gl_FragColor=max(texture2D(t,uv)*k-vec4(.7/255.),0.);}';
-const FS_SHOW = 'precision mediump float;uniform sampler2D t;uniform float gain;varying vec2 uv;void main(){vec3 c=texture2D(t,uv).rgb;c=1.-exp(-c*gain);float l=max(c.r,max(c.g,c.b));gl_FragColor=vec4(c*vec3(.94,.95,1.),l);}';
+const FS_SHOW = 'precision mediump float;uniform sampler2D t;uniform float gain;varying vec2 uv;void main(){vec3 c=texture2D(t,uv).rgb;c=1.-exp(-c*gain);float l=max(c.r,max(c.g,c.b));gl_FragColor=vec4(c,l);}';
 
 function program(gl, vs, fs) {
   const mk = (t, s) => { const o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
@@ -30,7 +30,7 @@ function program(gl, vs, fs) {
   if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error('link'); return pr;
 }
 
-export function startFlow(host, selector) {
+export function startCpuFlow(host, selector) {
   const canvas = document.createElement('canvas'); canvas.className = 'flow'; canvas.setAttribute('aria-hidden', 'true'); document.body.append(canvas);
   const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, powerPreference: 'high-performance' });
   if (!gl) { canvas.remove(); return () => {}; }
