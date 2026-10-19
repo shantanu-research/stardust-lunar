@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#000000">
+<title>STARDUST — Lunar imaging system</title>
+<meta name="description" content="Sun-angle, scale and modality invariant image correspondence for Chandrayaan-2 OHRC, TMC-2 and IIRS observations (SIH26166).">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='white' stroke-width='1.6'%3E%3Crect width='32' height='32' fill='black'/%3E%3Ccircle cx='15' cy='17' r='9'/%3E%3Cpath d='M6 26 27 5'/%3E%3C/svg%3E">
+<script src="js/boot.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; worker-src 'self' blob:; connect-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'">
+<link rel="preload" href="assets/fonts/font-6.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="assets/fonts/font-7.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="modulepreload" href="js/app.js">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/motion.css">
+</head>
+<body data-page="home">
+<header class="topbar">
+  <a class="brand" href="#/home" aria-label="STARDUST home">
+    <span class="logo-orb" aria-hidden="true"></span>
+    Stardust
+  </a>
+  <div class="top-right">
+    <button class="icon-btn" id="themeBtn" aria-label="Toggle light / dark theme" title="Toggle theme"></button>
+    <a class="avatar" href="#/settings" aria-label="Settings" title="Settings"></a>
+  </div>
+</header>
+<nav class="rail" id="rail" aria-label="Primary"></nav>
+<main id="view" tabindex="-1"></main>
+<div id="modalRoot"></div>
+<noscript><p style="padding:120px 40px">STARDUST needs JavaScript.</p></noscript>
+<script src="vendor/gsap.min.js" defer></script>
+<script src="vendor/lenis.min.js" defer></script>
+<script src="js/engine.js" defer></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

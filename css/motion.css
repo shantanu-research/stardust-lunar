@@ -1,0 +1,154 @@
+/* ═════ Atmosphere & motion layer (loaded after app.css) ═════ */
+#sky{position:fixed;inset:0;width:100vw;height:100vh;z-index:-2;pointer-events:none;transition:opacity 1.2s var(--ease)}
+:root[data-theme=light] #sky{opacity:0}
+:root,:root[data-theme=dark]{--neb-a:rgba(110,130,255,.07);--neb-b:rgba(170,120,255,.05);--neb-c:rgba(255,190,140,.025)}
+:root[data-theme=light]{--neb-a:rgba(90,110,220,.06);--neb-b:rgba(150,110,220,.04);--neb-c:rgba(220,150,90,.03)}
+body::before{background:radial-gradient(55vw 38vw at 88% -8%,var(--neb-a),transparent 70%),radial-gradient(42vw 32vw at -6% 108%,var(--neb-b),transparent 70%),radial-gradient(30vw 20vw at 50% 120%,var(--neb-c),transparent 70%);animation:nebula 40s ease-in-out infinite alternate}
+@keyframes nebula{to{transform:translate3d(-2vw,1.5vh,0) scale(1.06)}}
+
+/* Aura canvas sits behind the card grid and spills past its edges. */
+.aura{position:absolute;left:-160px;top:-160px;pointer-events:none;z-index:0}
+.mode-grid,.proj-grid{position:relative}
+.mode,.proj{z-index:1}
+.mode{transition:transform 1.1s var(--ease),border-color .8s var(--ease),opacity .9s var(--ease),filter .9s var(--ease),box-shadow 1.1s var(--ease)}
+.mode::before{content:'';position:absolute;inset:0;border-radius:20px;z-index:-1;pointer-events:none;opacity:0;background:radial-gradient(120% 70% at 50% 0%,rgba(205,215,255,.16),transparent 60%);transition:opacity 1s var(--ease)}
+.mode:hover,.mode:focus-visible{transform:translateY(-6px) scale(1.02);box-shadow:0 0 0 1px rgba(255,255,255,.55),0 0 40px rgba(190,200,255,.18),0 30px 80px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.35)}
+.mode:hover::before,.mode:focus-visible::before{opacity:1}
+.mode:hover::after,.mode:focus-visible::after{background:linear-gradient(180deg,#151517,#0a0a0c)}
+:root[data-theme=light] .mode:hover::after{background:linear-gradient(180deg,#fff,#f4f4f6)}
+:root[data-theme=light] .mode:hover{box-shadow:0 0 0 1px rgba(0,0,0,.6),0 30px 80px rgba(40,50,90,.18)}
+.mode-grid:has(.mode:hover) .mode:not(:hover){opacity:.72;filter:none}
+.mode .moon{transition:filter 1s var(--ease),transform 1.4s var(--ease),box-shadow 1s var(--ease)}
+.mode:hover .moon,.mode:focus-visible .moon{transform:scale(1.12);box-shadow:0 0 60px rgba(200,210,255,.28),0 0 0 1px rgba(255,255,255,.12)}
+.proj:hover{box-shadow:0 0 0 1px var(--line-3),0 30px 80px rgba(0,0,0,.5),0 0 50px rgba(180,195,255,.08)}
+
+/* Slower, quieter page choreography. */
+.view-in{animation:viewIn 1.1s var(--ease) backwards}
+@keyframes viewIn{from{opacity:0;transform:translateY(18px);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+.tab-in>*{animation:rise .9s var(--ease) backwards}
+.metric-grid>*,.side-stack>*,.two>*,.reg-grid>*,.set-grid>*,.sample-grid>*,.proc>*,.cmp>*,.start>*>*,.page-head,.toolbar{animation:rise 1s var(--ease) backwards}
+:is(.metric-grid,.side-stack,.two,.reg-grid,.set-grid,.sample-grid,.proc,.cmp)>:nth-child(2){animation-delay:.09s}
+:is(.metric-grid,.side-stack,.two,.reg-grid,.set-grid,.sample-grid,.proc,.cmp)>:nth-child(3){animation-delay:.18s}
+:is(.metric-grid,.side-stack,.two,.reg-grid,.set-grid,.sample-grid,.proc,.cmp)>:nth-child(4){animation-delay:.27s}
+:is(.metric-grid,.side-stack,.two,.reg-grid,.set-grid,.sample-grid,.proc,.cmp)>:nth-child(5){animation-delay:.36s}
+.start>*>:nth-child(2){animation-delay:.1s}.start>*>:nth-child(3){animation-delay:.2s}.start>*>:nth-child(4){animation-delay:.3s}.start>*>:nth-child(5){animation-delay:.4s}.start>*>:nth-child(6){animation-delay:.5s}
+.ws-nav a{animation:rise .9s var(--ease) backwards}
+.ws-nav a:nth-child(2){animation-delay:.05s}.ws-nav a:nth-child(3){animation-delay:.1s}.ws-nav a:nth-child(4){animation-delay:.15s}.ws-nav a:nth-child(5){animation-delay:.2s}
+.card{transition:border-color .6s var(--ease),box-shadow .8s var(--ease),transform .8s var(--ease)}
+.card:hover{box-shadow:0 20px 60px rgba(0,0,0,.35),0 0 40px rgba(180,195,255,.05)}
+.drop{align-content:center}
+
+/* Modal: grand entrance, graceful exit. */
+.overlay{animation:fade .6s var(--ease)}
+.modal{animation:pop .8s var(--ease);box-shadow:0 40px 120px rgba(0,0,0,.6),0 0 80px rgba(170,185,255,.08)}
+@keyframes pop{from{opacity:0;transform:translateY(30px) scale(.96);filter:blur(6px)}}
+.overlay.closing{animation:fadeOut .38s var(--ease) forwards}.overlay.closing .modal{animation:popOut .38s var(--ease) forwards}
+@keyframes fadeOut{to{opacity:0}}@keyframes popOut{to{opacity:0;transform:translateY(16px) scale(.98)}}
+
+/* Mode brief: the image breathes, a faint scan line passes, the crosshair ring glows cool. */
+.stage-img img{animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{to{transform:scale(1.06) translate(-1%,1%)}}
+.stage-img .ring{border-color:rgba(210,220,255,.9);box-shadow:0 0 18px rgba(170,190,255,.45)}
+.stage-img::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 48%,rgba(190,205,255,.10) 50%,transparent 52%);background-size:100% 220%;animation:scan 7s linear infinite}
+@keyframes scan{from{background-position:0 -120%}to{background-position:0 120%}}
+.tabs button::after{transition:transform .7s var(--ease)}
+.dot.on{box-shadow:0 0 12px rgba(190,205,255,.9)}
+@media(prefers-reduced-motion:reduce){body::before,.stage-img img,.stage-img::after,.ws-nav a{animation:none!important}}
+
+/* ═════ Analysis aurora ═════ */
+.topbar,.rail,#view{transition:transform 1.3s var(--ease),filter 1.3s var(--ease),opacity 1.1s var(--ease)}
+body.analysing{overflow:hidden}
+body.analysing #view{transform:scale(.9) translateY(40px);filter:blur(16px);opacity:0;pointer-events:none}
+body.analysing .topbar{transform:translateY(-30px);opacity:0;pointer-events:none}
+body.analysing .rail{transform:translateX(-40px);opacity:0;pointer-events:none}
+.aurora{position:fixed;inset:0;z-index:180;display:grid;place-items:center;pointer-events:none;opacity:0;visibility:hidden;transition:opacity 1.4s var(--ease),visibility 0s linear 1.4s}
+.aurora.on{opacity:1;visibility:visible;pointer-events:auto;transition:opacity 1.6s var(--ease) .25s,visibility 0s}
+.aurora.leaving{opacity:0;transition:opacity 1.3s var(--ease)}
+.aurora canvas{position:absolute;inset:-4%;width:108%;height:108%;filter:blur(10px) saturate(1.15);transform:scale(1.06);transition:transform 6s var(--ease)}
+.aurora.on canvas{transform:scale(1)}
+.aurora-veil{position:absolute;inset:0;background:radial-gradient(60% 40% at 50% 50%,rgba(0,0,0,.45),transparent 75%),linear-gradient(transparent 70%,rgba(0,0,0,.5))}
+.aurora-copy{position:relative;text-align:center;max-width:760px;padding:0 24px;transform:translateY(16px);opacity:0;transition:transform 1.6s var(--ease) .5s,opacity 1.4s var(--ease) .5s}
+.aurora.on .aurora-copy{transform:none;opacity:1}
+.aurora.leaving .aurora-copy{transform:translateY(-14px);opacity:0;transition-delay:0s}
+.aurora-eyebrow{margin:0 0 26px;font:400 10px var(--font);letter-spacing:.42em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.aurora-word{position:relative;height:1.25em;margin:0 0 34px;font:300 clamp(34px,4.4vw,60px)/1.2 var(--display);letter-spacing:.06em;color:#fff}
+.aurora-word span{position:absolute;left:0;right:0;white-space:nowrap;background:linear-gradient(100deg,#fff 30%,#cfe0ff 45%,#ffffff 55%,#e6d8ff 70%,#fff 85%) 0 0/250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:wordIn 1.2s var(--ease) backwards,sheen 4s linear infinite}
+.aurora-word span.out{animation:wordOut 1.1s var(--ease) forwards}
+@keyframes wordIn{from{opacity:0;filter:blur(12px);letter-spacing:.22em;transform:translateY(10px)}}
+@keyframes wordOut{to{opacity:0;filter:blur(12px);letter-spacing:-.02em;transform:translateY(-12px)}}
+@keyframes sheen{to{background-position:-250% 0}}
+.aurora-word .dots b{display:inline-block;font-weight:300;animation:dot 1.6s ease-in-out infinite}
+.aurora-word .dots b:nth-child(2){animation-delay:.2s}.aurora-word .dots b:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,100%{opacity:.25}50%{opacity:1}}
+.aurora-fact{margin:0 auto;max-width:560px;transition:opacity .7s var(--ease),filter .7s var(--ease),transform .7s var(--ease)}
+.aurora-fact.swap{opacity:0;filter:blur(6px);transform:translateY(6px)}
+.aurora-fact blockquote{margin:0;font:400 15px/1.75 var(--font);color:rgba(255,255,255,.78);letter-spacing:.02em}
+.aurora-fact figcaption{margin-top:12px;font:400 10px var(--font);letter-spacing:.32em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.aurora-fact figcaption::before{content:'— '}
+.aurora-foot{position:absolute;left:50%;bottom:7vh;width:min(420px,80vw);transform:translate(-50%,10px);opacity:0;transition:opacity 1.2s var(--ease) .9s,transform 1.4s var(--ease) .9s;text-align:center}
+.aurora.on .aurora-foot{opacity:1;transform:translate(-50%,0)}
+.aurora.leaving .aurora-foot{opacity:0;transition-delay:0s}
+.aurora-bar{height:1px;background:rgba(255,255,255,.14);overflow:hidden;border-radius:1px}
+.aurora-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#9fe7d2,#bcd2ff,#d9c6ff);box-shadow:0 0 12px rgba(190,210,255,.9);transition:width .8s var(--ease)}
+.aurora-meta{display:flex;justify-content:space-between;margin-top:12px;font:400 10.5px var(--font);letter-spacing:.12em;color:rgba(255,255,255,.55)}
+.aurora-cancel{margin-top:22px;height:30px;padding:0 18px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:transparent;color:rgba(255,255,255,.6);font:400 11px var(--font);letter-spacing:.1em;transition:color .3s,border-color .3s}
+.aurora-cancel:hover{color:#fff;border-color:rgba(255,255,255,.5)}
+@media(prefers-reduced-motion:reduce){.aurora-word span{animation:none}}
+
+/* page exit */
+.view-out{opacity:0;transform:translateY(-8px);filter:blur(6px);transition:opacity .26s var(--ease),transform .26s var(--ease),filter .26s var(--ease)}
+
+/* small fixes */
+.card-head h3,.card-head .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.22em}
+.pill{white-space:nowrap;flex:none}
+.tabs{overflow-y:hidden;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+
+/* flare layers (full screen, never clipped) */
+.flare{position:fixed;inset:0;width:100vw;height:100vh;z-index:-1;pointer-events:none}
+.flare-soft{filter:blur(16px)}
+body.analysing .flare{opacity:0}
+.mode:hover,.mode:focus-visible{box-shadow:0 0 0 1px rgba(255,255,255,.7),0 0 30px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.35)}
+
+/* let the fixed sky, nebula and flare layers show (html paints the base colour) */
+body{background:transparent}
+
+/* cards let a little of the flare through, like the reference; the hovered card stays solid */
+.mode{background:transparent}
+.mode::after{background:linear-gradient(180deg,rgba(16,16,18,.78),rgba(6,6,8,.86))}
+:root[data-theme=light] .mode::after{background:linear-gradient(180deg,rgba(255,255,255,.8),rgba(246,246,244,.86))}
+.mode:hover::after,.mode:focus-visible::after{background:linear-gradient(180deg,rgba(22,22,26,.94),rgba(8,8,10,.96))}
+
+/* ═════ v2: WebGL flare + aurora ═════ */
+:root{--flare-rgb:138,160,255}
+:root[data-theme=light]{--flare-rgb:90,110,220}
+.flare{position:fixed;inset:0;z-index:-1;pointer-events:none}
+.aurora{background:#02030a}
+.aurora canvas{inset:0;width:100%;height:100%;filter:none;transform:none;transition:none}
+.aurora.on canvas{transform:none}
+.aurora-veil{background:radial-gradient(55% 38% at 50% 48%,rgba(0,0,0,.5),transparent 78%),linear-gradient(transparent 72%,rgba(0,0,0,.35))}
+.aurora-copy,.aurora-foot{transition:none;opacity:1;transform:none}
+.aurora.on .aurora-copy,.aurora.on .aurora-foot{opacity:1}
+.aurora{transition:none;opacity:0}
+.aurora.on{opacity:1}
+.aurora-word{height:1.3em;display:block}
+.aurora-word .wordline{position:absolute;left:0;right:0;display:block;white-space:nowrap}
+.aurora-word .ch{display:inline-block;will-change:transform,opacity,filter;color:#fff;text-shadow:0 0 38px rgba(150,200,255,.55),0 0 90px rgba(120,255,200,.25)}
+.aurora-word span{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#fff;animation:none}
+.aurora-word span.out{animation:none}
+.aurora-fact blockquote{text-shadow:0 1px 24px rgba(0,0,0,.6)}
+
+.aurora-word .ch{position:static;left:auto;right:auto;display:inline-block}
+.aurora-word .wordline{text-align:center}
+
+.flare{z-index:2 !important;mix-blend-mode:screen}
+
+/* ═════ performance hygiene ═════ */
+.proj,.mode{contain:layout paint style}
+.proj{content-visibility:auto;contain-intrinsic-size:auto 300px}
+.flare,.aurora canvas{contain:strict}
+body.perf-low .topbar,body.perf-low .modal,body.perf-low .mode-menu{backdrop-filter:none !important}
+body.perf-low *{animation-duration:.01ms !important;animation-iteration-count:1 !important}
+body.perf-low .moon{animation:none !important}
+@media (prefers-reduced-motion:reduce){.moon{animation:none !important}}
+:root[data-os=linux] body{text-rendering:optimizeLegibility}
+html{scrollbar-width:thin;scrollbar-color:#333 transparent}
